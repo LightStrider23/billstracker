@@ -637,7 +637,10 @@
         window.renderBills = function (filteredBills = null) {
             const tbody = document.getElementById('billsTableBody');
             const emptyState = document.getElementById('emptyState');
-            const dataToRender = filteredBills || bills;
+            let dataToRender = filteredBills || bills;
+
+            // Sort by due date descending (most recent on top)
+            dataToRender.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
 
             if (dataToRender.length === 0) {
                 tbody.innerHTML = '';
@@ -649,7 +652,7 @@
             tbody.innerHTML = dataToRender.map(bill => `
                 <tr>
                     <td><strong>${escapeHtml(bill.name)}</strong></td>
-                    <td>$${parseFloat(bill.amount).toFixed(2)}</td>
+                    <td>₱${formatCurrency(bill.amount)}</td>
                     <td>${formatDate(bill.dueDate)}</td>
                     <td><span class="status-badge status-${bill.status}">${bill.status}</span></td>
                     <td><span class="priority-${bill.priority}">${bill.priority}</span></td>
@@ -799,9 +802,16 @@
             window.URL.revokeObjectURL(url);
         };
 
+        function formatCurrency(amount) {
+            return parseFloat(amount).toLocaleString('en-PH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
         function formatDate(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
+            return date.toLocaleDateString('en-PH', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric'
